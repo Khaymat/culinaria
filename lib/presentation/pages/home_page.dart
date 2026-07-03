@@ -1,7 +1,9 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../injection_container.dart';
+import '../blocs/auth_bloc.dart';
 import '../blocs/category_bloc.dart';
+import 'login_page.dart';
 import 'meals_page.dart';
 import 'search_page.dart';
 import 'favorites_page.dart';
@@ -26,6 +28,56 @@ class HomePage extends StatelessWidget {
                   context, MaterialPageRoute(builder: (_) => FavoritesPage())),
             )
           ],
+        ),
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              BlocBuilder<AuthBloc, AuthState>(
+                builder: (context, state) {
+                  if (state is Authenticated) {
+                    return DrawerHeader(
+                      decoration: BoxDecoration(color: Colors.orange),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Icon(Icons.account_circle, size: 64, color: Colors.white),
+                          Text(state.user.name, style: TextStyle(color: Colors.white, fontSize: 20)),
+                          Text(state.user.email, style: TextStyle(color: Colors.white70, fontSize: 14)),
+                        ],
+                      ),
+                    );
+                  }
+                  return DrawerHeader(
+                    decoration: BoxDecoration(color: Colors.orange),
+                    child: Text('Culinaria', style: TextStyle(color: Colors.white, fontSize: 24)),
+                  );
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.favorite),
+                title: Text('Favorit'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => FavoritesPage()));
+                },
+              ),
+              Divider(),
+              ListTile(
+                leading: Icon(Icons.logout),
+                title: Text('Keluar'),
+                onTap: () {
+                  context.read<AuthBloc>().add(LogoutEvent());
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (_) => LoginPage()),
+                    (route) => false,
+                  );
+                },
+              ),
+            ],
+          ),
         ),
         body: BlocBuilder<CategoryBloc, CategoryState>(
           builder: (context, state) {
